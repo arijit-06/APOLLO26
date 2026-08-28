@@ -7,11 +7,10 @@ import sys
 import os
 import torch
 
-# Ensure we can import the ML modules from the root directory
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 
 try:
-    # Importing actual track A modules
     from ml_preprocessing import robust_dpat_scaling, interpolate_trajectories
     from tier1_statistical import run_tier1_filter
     from tier2_autoencoder import ChronoDriftAnomalyEngine
@@ -21,37 +20,53 @@ except ImportError as e:
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+def parse_csv_to_tensor(csv_path: str):
+    """
+    Ingests raw ATE CSV test logs and transforms them into a strictly ordered 
+    (num_samples, 4, 3) 3D tensor suitable for the ChronoDrift-AI ML pipeline.
+    """
+    expected_times = [0, 24, 96, 168]
+    df = pd.read_csv(csv_path)
+    
+    required_cols = ['die_id', 'lot_id', 'timestamp', 'iddq', 'leakage_current', 'prop_delay']
+    for col in required_cols:
+        if col not in df.columns:
+            raise ValueError(f"Malformed CSV: Missing required column '{col}'")
+            
+    df = df[df['timestamp'].isin(expected_times)].copy()
+    df.sort_values(by=['die_id', 'timestamp'], inplace=True)
+    
+    die_counts = df['die_id'].value_counts()
+    complete_dies = die_counts[die_counts == 4].index
+    
+    df_clean = df[df['die_id'].isin(complete_dies)].copy()
+    if df_clean.empty:
+        raise ValueError("FATAL: No complete component sequences (0h, 24h, 96h, 168h) found in the CSV.")
+        
+    metadata = df_clean.iloc[::4][['die_id', 'lot_id']]
+    die_ids = metadata['die_id'].values
+    lot_ids = metadata['lot_id'].values
+    
+    feature_cols = ['iddq', 'leakage_current', 'prop_delay']
+    flat_features = df_clean[feature_cols].values
+    
+    num_samples = len(die_ids)
+    raw_tensor = flat_features.reshape((num_samples, 4, 3))
+    
+    return raw_tensor, lot_ids, die_ids
+
 def execute_ml_pipeline(csv_path: str, job_id: str):
-    """
-    Executes the TRUE ChronoDrift-AI ML Pipeline using actual models.
-    """
     logging.info(f"[Job {job_id}] Starting REAL ML Pipeline execution for {csv_path}")
     
-    os.makedirs("reports", exist_ok=True)
-    report_path = os.path.join("reports", f"{job_id}_final_report.json")
+    DATA_REPORTS_DIR = os.path.join(BASE_DIR, "data", "reports")
+    os.makedirs(DATA_REPORTS_DIR, exist_ok=True)
+    report_path = os.path.join(DATA_REPORTS_DIR, f"{job_id}_final_report.json")
     
     try:
-        # Step 0: Ingest Physical CSV and apply real preprocessing logic
         logging.info(f"[Job {job_id}] Step 0: Parsing physical CSV {csv_path}...")
+        raw_data, lot_ids, die_ids = parse_csv_to_tensor(csv_path)
+        discrete_times = np.array([0, 24, 96, 168])
         
-        # Read the raw physical CSV uploaded via the FastAPI endpoint
-        df = pd.read_csv(csv_path)
-        
-        # In a real environment, we'd map df -> 3D tensor cleanly based on die_id and time_h.
-        # Since the uploaded CSV is an ATE log, we extract unique dies and form the 3D tensor
-        # For this SIH prototype MVP bridging logic, if the CSV lacks enough data,
-        # we load the generated `burn_in_sequences.npy` directly to demonstrate functionality.
-        try:
-            raw_data = np.load(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "burn_in_sequences.npy"))
-            num_samples = raw_data.shape[0]
-            # Mock lot ids for DPAT
-            lot_ids = np.random.randint(0, 50, size=num_samples)
-            discrete_times = np.array([0, 24, 96, 168])
-            logging.info(f"[Job {job_id}] Loaded sequence array successfully.")
-        except Exception as file_e:
-            logging.error(f"Missing underlying sequences: {file_e}")
-            raise ValueError("burn_in_sequences.npy is missing.")
-            
         logging.info(f"[Job {job_id}] Step 1: Running DPAT & PCHIP Interpolation...")
         continuous_times = np.arange(0, 169)
         scaled_data = robust_dpat_scaling(raw_data, lot_ids)
@@ -62,21 +77,18 @@ def execute_ml_pipeline(csv_path: str, job_id: str):
         num_features = tensor_3d.shape[2]
         time_steps = tensor_3d.shape[1]
         
-        # Step 2: Tier 1 Statistical Filter
         logging.info(f"[Job {job_id}] Step 2: Executing Tier 1 Mahalanobis Filter...")
         t1_results = run_tier1_filter(tensor_3d)
         gross_fail_mask = t1_results["routing_mask"]
         gross_fail_indices = np.where(gross_fail_mask)[0]
         passing_indices = np.where(~gross_fail_mask)[0]
         
-        # Step 3: Tier 2 LSTM Autoencoder
         logging.info(f"[Job {job_id}] Step 3: Pushing passing components through LSTM...")
         passing_tensor = tensor_3d[passing_indices]
         engine = ChronoDriftAnomalyEngine(seq_len=time_steps, n_features=num_features, hidden_dim=32, latent_dim=8)
         latent_mask, errors, threshold = engine.evaluate_anomalies(passing_tensor, threshold_percentile=95.0)
         latent_defect_indices = passing_indices[latent_mask]
         
-        # Step 4: Tier 3 SHAP / Integrated Gradients
         logging.info(f"[Job {job_id}] Step 4: Generating XAI Explainability...")
         feature_names = ["I_DDQ_Magnitude", "Leakage_Magnitude", "Delay_Magnitude", "I_DDQ_Velocity", "Leakage_Velocity", "Delay_Velocity"]
         anomalies_list = []
@@ -92,18 +104,17 @@ def execute_ml_pipeline(csv_path: str, job_id: str):
                     flagged_samples=flagged_tensor, 
                     device=engine.device
                 )
-                component_ids = [f"COMP_{idx}" for idx in latent_defect_indices]
+                component_ids = [str(die_ids[idx]) for idx in latent_defect_indices]
                 json_string = generate_root_cause_json(attributions, component_ids, feature_names)
                 anomalies_list = json.loads(json_string)
             except Exception as e:
                 logging.error(f"[Job {job_id}] Explainability failed: {str(e)}")
-                anomalies_list = [{"die_id": f"COMP_{idx}", "primary_failure": "Unknown", "contribution_percentage": 0.0} for idx in latent_defect_indices]
+                anomalies_list = [{"die_id": str(die_ids[idx]), "primary_failure": "Unknown", "contribution_percentage": 0.0} for idx in latent_defect_indices]
         
-        # Final Packaging
         final_report = {
             "job_id": job_id,
             "status": "completed",
-            "total_components_processed": num_samples,
+            "total_components_processed": len(die_ids),
             "gross_failures": len(gross_fail_indices),
             "latent_defects": len(latent_defect_indices),
             "anomalies": anomalies_list

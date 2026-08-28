@@ -1,0 +1,48 @@
+# ==============================================================
+# ChronoDrift-AI (SIH 2026 MVP) - Global Git Ignore
+# ==============================================================
+
+# Python / ML Core
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# Environment Variables / Secrets
+.env
+.env.local
+.env.*
+
+# React / Node (Frontend)
+node_modules/
+dist/
+build/
+.npm/
+.pnp.*
+package-lock.json
+
+# IDEs and OS Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ==============================================================
+# Data Architecture (Crucial to prevent repo bloat!)
+# ==============================================================
+# Ignore all heavy tensors and batch uploads
+data/raw/*
+data/processed/*
+data/reports/*
+
+# EXCEPTION 1: Force Git to track the empty folder structures
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/reports/.gitkeep
+
+# EXCEPTION 2: Allow the synthetic generator and sample test logs for judges
+!data/synthetic/
+!data/synthetic/sample_burn_in_log.csv
