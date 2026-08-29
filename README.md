@@ -10,41 +10,26 @@ During 125°C accelerated burn-in testing for space-grade semiconductor payloads
 
 ## 🛠 Comprehensive Tech Stack
 *   **Machine Learning / AI Core:** Python, PyTorch, Scikit-Learn, SciPy, SHAP, Captum (Integrated Gradients)
-*   **Backend & Data Pipeline:** FastAPI, Uvicorn, Pandas, NumPy, Pydantic
-*   **Frontend Command Center:** React.js, Vite, Tailwind CSS, Apache ECharts, Lucide Icons
+*   **Unified Dashboard:** Streamlit, Plotly, Pandas, NumPy
 
 ## 📂 Project Structure
 ```text
 ChronoDrift-AI/
-├── backend/
-│   ├── main.py
-│   ├── routes.py
-│   └── ml_runner.py
-├── frontend/
-│   ├── package.json
-│   ├── src/
-│   │   ├── App.jsx
-│   │   └── components/
-│   │       ├── Dashboard.jsx
-│   │       ├── UploadATE.jsx
-│   │       ├── WaferMap.jsx
-│   │       ├── DriftCharts.jsx
-│   │       └── ExplainabilityPanel.jsx
+├── app.py                     # Streamlit Unified Command Center
+├── ml_runner.py               # Core Pipeline Orchestrator
 ├── ml_core/
 │   ├── ml_preprocessing.py
 │   ├── tier1_statistical.py
 │   ├── tier2_autoencoder.py
 │   └── tier3_explainability.py
-├── data/
-│   ├── data_synthesis.py
-│   └── burn_in_sequences.npy
-├── test_e2e_simulation.py
-└── README.md
+└── data/
+    ├── raw/                   # User Uploaded ATE Logs
+    ├── processed/             # Intermediate Scaling Tensors
+    ├── reports/               # SHAP JSON Explanations
+    └── synthetic/             # Physics Simulation Engine
 ```
 
-## 📊 Implementation of Proposed Solutions (PPT Alignment)
-Our codebase natively reflects every conceptual claim made in our SIH Idea Presentation:
-
+## 🏗 The 3-Tier Architecture
 | PPT Presentation Claim | Codebase Implementation Mapping |
 | :--- | :--- |
 | **"0h, 24h, 96h, 168h Time Alignment"** | `ml_core/ml_preprocessing.py` (PCHIP Interpolation & `parse_csv_to_tensor`) |
@@ -55,36 +40,21 @@ Our codebase natively reflects every conceptual claim made in our SIH Idea Prese
 
 ## 🚀 Local Setup Instructions
 
-### 1. Initialize the FastAPI Backend
+### 1. Install Dependencies
 ```bash
 # Clone the repository
 git clone https://github.com/your-username/ChronoDrift-AI.git
 cd ChronoDrift-AI
 
 # Install Python requirements
-pip install fastapi uvicorn torch scikit-learn pandas scipy captum aiofiles
-
-# Boot the asynchronous integration bridge
-python backend/main.py
+pip install streamlit plotly pandas numpy torch scikit-learn scipy captum
 ```
-*The ML API will successfully bind to `http://localhost:8000`.*
 
-### 2. Launch the React Dashboard
+### 2. Launch the Streamlit Dashboard
 ```bash
-# Open a new terminal and navigate to the UI directory
-cd frontend
-
-# Install Node dependencies
-npm install recharts lucide-react tailwindcss
-
-# Boot the Vite development server
-npm run dev
+# Boot the Unified Command Center
+streamlit run app.py
 ```
-*The interactive ISRO command center will launch on `http://localhost:3000`.*
-
-## 👥 Team Apollo 26 Credits
-*   **Arijit** – Lead AI / ML Architecture (Track A)
-*   **Sourashis Sabud** – Full-Stack / API Integration Engineer (Track B)
-*   **Protyay Saha** – Frontend Architecture & UI/UX (Track B)
+*The interactive ISRO command center will launch on `http://localhost:8501`.*
 
 *Engineered with precision for the Smart India Hackathon 2026.*
