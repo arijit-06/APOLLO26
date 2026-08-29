@@ -52,7 +52,7 @@ class LSTMAutoencoder(nn.Module):
 
 class ChronoDriftAnomalyEngine:
     """
-    Manages the training and evaluation of the LSTM Autoencoder for ChronoDrift-AI.
+    Manages the training and evaluation of the LSTM Autoencoder for PBAA - Pre-flight Burn-In Anomaly Analysis.
     """
     def __init__(self, seq_len: int, n_features: int, hidden_dim: int = 64, latent_dim: int = 16, device: str = None):
         self.device = device if device else ('cuda' if torch.cuda.is_available() else 'cpu')

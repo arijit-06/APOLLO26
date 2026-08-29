@@ -1,4 +1,4 @@
-# ChronoDrift-AI 🚀
+# PBAA - Pre-flight Burn-In Anomaly Analysis 🚀
 **SIH 2026 Problem Statement ID: 26170 | Team: Apollo 26**
 
 ---
@@ -6,7 +6,7 @@
 ## 🛰 Overview & Aerospace Impact
 During 125°C accelerated burn-in testing for space-grade semiconductor payloads, traditional static failure thresholds often miss microscopic drift. These **latent defects** technically pass the screening phase but carry degradation curves that inevitably lead to catastrophic burnout in the vacuum of space.
 
-**ChronoDrift-AI** is a comprehensive, full-stack temporal AI engine built to solve this critical vulnerability. By ingesting discrete ATE logs (0h, 24h, 96h, 168h) and mapping them into continuous trajectories, our 3-Tier Machine Learning Core identifies subtle sequence acceleration, instantly isolating components destined to fail in orbit.
+**PBAA - Pre-flight Burn-In Anomaly Analysis** is a comprehensive, full-stack temporal AI engine built to solve this critical vulnerability. By ingesting discrete ATE logs (0h, 24h, 96h, 168h) and mapping them into continuous trajectories, our 3-Tier Machine Learning Core identifies subtle sequence acceleration, instantly isolating components destined to fail in orbit.
 
 ## 🛠 Comprehensive Tech Stack
 *   **Machine Learning / AI Core:** Python, PyTorch, Scikit-Learn, SciPy, SHAP, Captum (Integrated Gradients)
@@ -14,7 +14,7 @@ During 125°C accelerated burn-in testing for space-grade semiconductor payloads
 
 ## 📂 Project Structure
 ```text
-ChronoDrift-AI/
+PBAA - Pre-flight Burn-In Anomaly Analysis/
 ├── app.py                     # Streamlit Unified Command Center
 ├── ml_runner.py               # Core Pipeline Orchestrator
 ├── ml_core/
@@ -43,8 +43,8 @@ ChronoDrift-AI/
 ### 1. Install Dependencies
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/ChronoDrift-AI.git
-cd ChronoDrift-AI
+git clone https://github.com/your-username/PBAA - Pre-flight Burn-In Anomaly Analysis.git
+cd PBAA - Pre-flight Burn-In Anomaly Analysis
 
 # Install Python requirements
 pip install streamlit plotly pandas numpy torch scikit-learn scipy captum

@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 def parse_csv_to_tensor(csv_path: str):
     """
     Ingests raw ATE CSV test logs and transforms them into a strictly ordered 
-    (num_samples, 4, 3) 3D tensor suitable for the ChronoDrift-AI ML pipeline.
+    (num_samples, 4, 3) 3D tensor suitable for the PBAA - Pre-flight Burn-In Anomaly Analysis ML pipeline.
     """
     expected_times = [0, 24, 96, 168]
     df = pd.read_csv(csv_path)

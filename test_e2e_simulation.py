@@ -6,7 +6,7 @@ import os
 API_BASE_URL = "http://localhost:8000/api"
 
 def run_simulation():
-    print("=== ChronoDrift-AI E2E Integration Simulation ===")
+    print("=== PBAA - Pre-flight Burn-In Anomaly Analysis E2E Integration Simulation ===")
     
     # 1. Generate Synthetic CSV Payload
     print("\n[1] Generating synthetic ATE CSV test log...")

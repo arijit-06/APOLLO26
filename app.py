@@ -116,7 +116,7 @@ with r1_col2:
         marker={"color": ["#555555", "#444444", "#333333"]}
     ))
     fig_funnel.update_layout(title="Yield Degradation Funnel", template="plotly_dark", margin=dict(l=20, r=20, t=40, b=20))
-    st.plotly_chart(fig_funnel, use_container_width=True)
+    st.plotly_chart(fig_funnel, width=True)
 
 with r1_col3:
     # Bar Chart for Rejects
@@ -131,7 +131,7 @@ with r1_col3:
         title="Anomaly Distribution by Tier"
     )
     fig_bar.update_layout(template="plotly_dark", showlegend=False, margin=dict(l=20, r=20, t=40, b=20))
-    st.plotly_chart(fig_bar, use_container_width=True)
+    st.plotly_chart(fig_bar, width=True)
 
 st.markdown("---")
 
@@ -156,7 +156,7 @@ with r2_col1:
     fig_map.update_traces(marker=dict(size=5, opacity=0.9))
     fig_map.update_layout(template="plotly_dark", xaxis=dict(showgrid=False, zeroline=False, visible=False), 
                           yaxis=dict(showgrid=False, zeroline=False, visible=False))
-    st.plotly_chart(fig_map, use_container_width=True)
+    st.plotly_chart(fig_map, width=True)
 
 with r2_col2:
     st.subheader("Latent Drift Magnitude (168h vs 0h)")
@@ -177,7 +177,7 @@ with r2_col2:
         title="Drift Delta Comparison (Log Scale)"
     )
     fig_box.update_layout(template="plotly_dark", yaxis_type="log")
-    st.plotly_chart(fig_box, use_container_width=True)
+    st.plotly_chart(fig_box, width=True)
 
 st.markdown("---")
 
@@ -222,7 +222,7 @@ if len(failures_df) > 0:
             color_discrete_sequence=['#DC143C']
         )
         fig_shap.update_layout(template="plotly_dark")
-        st.plotly_chart(fig_shap, use_container_width=True)
+        st.plotly_chart(fig_shap, width=True)
         
     with r3_col2:
         st.markdown("<br><br>", unsafe_allow_html=True)

@@ -6,7 +6,7 @@ import time
 def generate_physics_based_dataset(num_components=100000, num_lots=50):
     """
     Generates a massive, physics-driven synthetic dataset for 125°C Accelerated Life Testing (Burn-in).
-    Models exact semiconductor failure mechanisms to test the ChronoDrift-AI ML Core.
+    Models exact semiconductor failure mechanisms to test the PBAA - Pre-flight Burn-In Anomaly Analysis ML Core.
     
     Physics Modeling Implemented:
     --------------------------------
